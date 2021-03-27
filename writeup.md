@@ -78,7 +78,7 @@ and they are installed to
 Next we have to copy all our daemon files including eboot which is signed with System/GL Auth
 (which makes them limited on memory and forces you to manually load all modules)
 
-so next i did the following
+so next i did the following after remount the System partition as RW via nmount
 
 
 ```
