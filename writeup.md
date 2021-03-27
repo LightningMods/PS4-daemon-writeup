@@ -6,7 +6,7 @@ Welcome to my writeup of how i found and implimented my own PS4 Daemon proc.
 
 ### Finding how Daemons work on PS4 ###
 
-when i first begain i noticed when you call this functions from a game
+when i first began i noticed when you call this functions from a game
 
 ```sceCommonDialogInitialize()```
 
