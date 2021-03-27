@@ -77,6 +77,12 @@ and they are installed to
 
 Next we have to copy all our daemon files including eboot which is signed with System/GL Auth
 (which makes them limited on memory and forces you to manually load all modules)
+via
+
+```
+make_fself.py --auth-info 010000000010003800000000001c004000ff00000000008000000000000000000000000000000000000000c000400040000000000000008000000000000000f00040ffff000000f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 cd.elf eboot.bin && copy eboot.bin I:\
+
+```
 
 so next i did the following after remount the System partition as RW via nmount
 
