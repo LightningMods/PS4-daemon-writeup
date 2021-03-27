@@ -94,6 +94,8 @@ SCE_LNC_UTIL_ERROR_NOT_INITIALIZED
 0x80940001
 `
 
+which can also be found where the ps4 keeps a list of errors
+
 so we need to first initlize it using
 
 ![pic3](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_3.png)
