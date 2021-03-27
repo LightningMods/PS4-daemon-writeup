@@ -32,6 +32,8 @@ sub_1020()
 
 ```
 
+![pic1](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_1.png)
+
 which calls many other functions to check things but also does
 
 ```sceLncUtilStartLaunchAppByTitleId("NPXS22010",....)```
@@ -53,7 +55,10 @@ typedef struct _LaunchAppParam
 LaunchAppParam;
 ```
 
-just like sceSystemServiceLaunchApp these seem to have the same protos
+just like sceSystemServiceLaunchApp these seem to have the same protos in the `libSceSystemService` module
+
+
+![pic2](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_2.png)
 
 ```
 int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LaunchAppParam* param);
@@ -62,6 +67,8 @@ int (*sceLncUtilStartLaunchApp)(const char* titleId, const char* argv[], LaunchA
 ```
 
 `sceSystemServiceLaunchApp` calls `sceLncUtilStartLaunchApp` which then calls the IPC iirc
+
+
 
 after looking though other PS4 daemons i noticed they are all similar and use gdd as their sfo catagory
 and they are installed to 
@@ -72,6 +79,7 @@ Next we have to copy all our daemon files including eboot which is signed with S
 (which makes them limited on memory and forces you to manually load all modules)
 
 so next i did the following
+
 
 ```
 /system/vsh/app/NPXS20119/sce_sys/param.sfo -> /system/vsh/app/LMSS0001/sce_sys/param.sfo
@@ -88,6 +96,10 @@ SCE_LNC_UTIL_ERROR_NOT_INITIALIZED
 
 so we need to first initlize it using
 
+![pic3](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_3.png)
+
+
+
 ```
 int (*sceLncUtilInitialize)();
 ```
@@ -96,6 +108,9 @@ which i found by backtracing shellcore to
 ```
 sceSystemServiceInitializeForShellCore()
 ```
+
+
+
 
 now we can finally run our daemon as follows
 
@@ -107,49 +122,47 @@ now we can finally run our daemon as follows
     {
                  klog("sceSystemServiceLaunchApp-pointer %p resolved from PRX\n", sceSystemServiceLaunchApp_pointer);
 
-								sceLncUtilInitialize = (void*)(sceSystemServiceLaunchApp_pointer + 0x1110);
+	sceLncUtilInitialize = (void*)(sceSystemServiceLaunchApp_pointer + 0x1110);
 
-								klog("sceLncUtilInitialize %p resolved from PRX\n", sceLncUtilInitialize);
+	klog("sceLncUtilInitialize %p resolved from PRX\n", sceLncUtilInitialize);
+        sceLncUtilLaunchApp = (void*)(sceSystemServiceLaunchApp_pointer + 0x1130);
 
-								sceLncUtilLaunchApp = (void*)(sceSystemServiceLaunchApp_pointer + 0x1130);
+	klog("sceLncUtilLaunchApp %p resolved from PRX\n", sceLncUtilLaunchApp);
 
-								klog("sceLncUtilLaunchApp %p resolved from PRX\n", sceLncUtilLaunchApp);
-
-								if(!sceLncUtilInitialize || !sceLncUtilLaunchApp)
-							    	printf("error\n");
+	if(!sceLncUtilInitialize || !sceLncUtilLaunchApp)
+	printf("error\n");
 								    
+        OrbisUserServiceInitializeParams params;
+	memset(&params, 0, sizeof(params));
+	params.priority = 700;
 
-								OrbisUserServiceInitializeParams params;
-								memset(&params, 0, sizeof(params));
-								params.priority = 700;
+	klog("ret %x\n", sceUserServiceInitialize(&params));
 
-								klog("ret %x\n", sceUserServiceInitialize(&params));
+	OrbisUserServiceLoginUserIdList userIdList;
 
-								OrbisUserServiceLoginUserIdList userIdList;
+	klog("ret %x\n", sceUserServiceGetLoginUserIdList(&userIdList));
 
-								klog("ret %x\n", sceUserServiceGetLoginUserIdList(&userIdList));
+	for (int i = 0; i < 4; i++)
+	{
+		if (userIdList.userId[i] != 0xFF)
+		{
+		  klog("[%i] User ID 0x%x\n", i, userIdList.userId[i]);
+		}
+	}
 
-								for (int i = 0; i < 4; i++)
-								{
-									if (userIdList.userId[i] != 0xFF)
-									{
-										klog("[%i] User ID 0x%x\n", i, userIdList.userId[i]);
-									}
-								}
+	LaunchAppParam param;
+	param.size = sizeof(LaunchAppParam);
+	param.user_id = userIdList.userId[0];
+	param.app_attr = 0;
+	param.enable_crash_report = 0;
+	param.check_flag = 0;
 
-								LaunchAppParam param;
-								param.size = sizeof(LaunchAppParam);
-								param.user_id = userIdList.userId[0];
-								param.app_attr = 0;
-								param.enable_crash_report = 0;
-								param.check_flag = 0;
+	klog("sceLncUtilInitialize %x\n", sceLncUtilInitialize());
 
-								klog("l1 %x\n", sceLncUtilInitialize());
-
-               uint64_t l2 = sceLncUtilLaunchApp("LMSS00001", 0, &param);
+       uint64_t l2 = sceLncUtilLaunchApp("LMSS00001", 0, &param);
 ```
 
-and after all our work Success!
+and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT
 
 ```
 
