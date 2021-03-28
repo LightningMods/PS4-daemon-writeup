@@ -201,6 +201,7 @@ sceNetListen(): 0x00000000
 Waiting for incoming connections...
 ```
 
+(Also works for Launching Game see the trailer for more info)
 
 
 
