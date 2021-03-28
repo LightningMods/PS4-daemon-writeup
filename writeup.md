@@ -44,7 +44,7 @@ first things first finding the structs which it seems to use
 after looking in shellui i found them!
 
 ```
-typedef struct _LaunchAppParam
+typedef struct _LncAppParam
 {
 	uint32_t size;
 	int32_t user_id;
@@ -52,7 +52,7 @@ typedef struct _LaunchAppParam
 	int32_t enable_crash_report;
 	uint64_t check_flag;
 }
-LaunchAppParam;
+LncAppParam;
 ```
 
 just like sceSystemServiceLaunchApp these seem to have the same protos in the `libSceSystemService` module
@@ -158,8 +158,8 @@ now we can finally run our daemon as follows
 		}
 	}
 
-	LaunchAppParam param;
-	param.size = sizeof(LaunchAppParam);
+	LncAppParam param;
+	param.size = sizeof(LncAppParam);
 	param.user_id = userIdList.userId[0];
 	param.app_attr = 0;
 	param.enable_crash_report = 0;
