@@ -84,7 +84,7 @@ via the LoadInternal function flatz used for his GL app)
 
 You can find more info regarding internal module ids here...
 
-![Devwiki internal IDs](https://www.psdevwiki.com/ps4/Libraries#Internal_sysmodule_libraries)
+[Devwiki internal IDs](https://www.psdevwiki.com/ps4/Libraries#Internal_sysmodule_libraries)
 
 ```
 make_fself.py --auth-info 010000000010003800000000001c004000ff00000000008000000000000000000000000000000000000000c000400040000000000000008000000000000000f00040ffff000000f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 cd.elf eboot.bin && copy eboot.bin I:\
