@@ -23,18 +23,18 @@ you actually spawn a daemon of CDLG type
 [SceShellCore] FMEM 143.2/ 243.4 NPXS22010 SceCdlgApp
 ```
 
-but how? good queston
+but how? good queston.
 
 The sub function incharge of spawning it is 
 
 ```
-sub_1020()
+sub_1020(...)
 
 ```
 
 ![pic1](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_1.png)
 
-which calls many other functions to check things but also does
+which calls many other check functions but also does
 
 ```sceLncUtilStartLaunchAppByTitleId("NPXS22010",....)```
 
@@ -46,11 +46,11 @@ after looking in shellui i found them!
 ```
 typedef struct _LncAppParam
 {
-	uint32_t size;
-	int32_t user_id;
-	int32_t app_attr;
-	int32_t enable_crash_report;
-	uint64_t check_flag;
+	u32 sz;
+	u32 user_id;
+	u32 app_opt;
+	u64 crash_report;
+	u64 check_flag;
 }
 LncAppParam;
 ```
@@ -61,30 +61,37 @@ just like sceSystemServiceLaunchApp these seem to have the same protos in the `l
 ![pic2](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_2.png)
 
 ```
-int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LaunchAppParam* param);
-int (*sceLncUtilStartLaunchAppByTitleId)(const char* titleId, const char* argv[], LaunchAppParam* param);
-int (*sceLncUtilStartLaunchApp)(const char* titleId, const char* argv[], LaunchAppParam* param);
+int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
+int (*sceLncUtilStartLaunchAppByTitleId)(const char* titleId, const char* argv[], LncAppParam* param);
+int (*sceLncUtilStartLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
 ```
 
 `sceSystemServiceLaunchApp` calls `sceLncUtilStartLaunchApp` which then calls the IPC iirc
 
 
 
-after looking though other PS4 daemons i noticed they are all similar and use gdd as their sfo catagory
-and they are installed to 
+after looking though other PS4 daemons, i noticed they are all similar and use gdd as their sfo catagory
+and they are installed to.
+
+(I'll save you the details on why that is)
+
 
 ```/system/vsh/app/TITLE_ID/```
 
 Next we have to copy all our daemon files including eboot which is signed with System/GL Auth
 (which makes them limited on memory and forces you to manually load all modules)
-via
+via the LoadInternal function flatz used for his GL app)
+
+You can find more info regarding internal module ids here...
+
+![Devwiki internal IDs](https://www.psdevwiki.com/ps4/Libraries#Internal_sysmodule_libraries)
 
 ```
 make_fself.py --auth-info 010000000010003800000000001c004000ff00000000008000000000000000000000000000000000000000c000400040000000000000008000000000000000f00040ffff000000f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 cd.elf eboot.bin && copy eboot.bin I:\
 
 ```
 
-so next i did the following after remount the System partition as RW via nmount
+so next i did the following after i remounted the System partition as RW via nmount
 
 
 ```
@@ -102,25 +109,32 @@ SCE_LNC_UTIL_ERROR_NOT_INITIALIZED
 
 which can also be found where the ps4 keeps a list of errors
 
-so we need to first initlize it using
+so we need to first initialize it using
 
 ![pic3](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/ida_3.png)
 
 
 
 ```
-int (*sceLncUtilInitialize)();
+int (*sceLncUtilInitialize)(void);
 ```
-which i found by backtracing shellcore to 
+which i found by backtracing shellcore to
 
 ```
 sceSystemServiceInitializeForShellCore()
 ```
 
+Note: you cannot call `sceSystemServiceInitializeForShellCore()` without being shellcore/having proper auth
+Or you will get EPERM.
+
 
 
 
 now we can finally run our daemon as follows
+
+Note: you can use LncUtil stubs instead with your SDK of choice to link these funcs
+But at the time I didn't make the stubs yet so I did it manually.
+
 
 ```
      sys_dynlib_load_prx("/system/common/lib/libSceSystemService.sprx", &libcmi);
@@ -128,7 +142,7 @@ now we can finally run our daemon as follows
     int serres = sys_dynlib_dlsym(libcmi, "sceSystemServiceLaunchApp", &sceSystemServiceLaunchApp_pointer);
     if (!serres)
     {
-                 klog("sceSystemServiceLaunchApp-pointer %p resolved from PRX\n", sceSystemServiceLaunchApp_pointer);
+        klog("sceSystemServiceLaunchApp-pointer %p resolved from PRX\n", sceSystemServiceLaunchApp_pointer);
 
 	sceLncUtilInitialize = (void*)(sceSystemServiceLaunchApp_pointer + 0x1110);
 
@@ -138,7 +152,7 @@ now we can finally run our daemon as follows
 	klog("sceLncUtilLaunchApp %p resolved from PRX\n", sceLncUtilLaunchApp);
 
 	if(!sceLncUtilInitialize || !sceLncUtilLaunchApp)
-	printf("error\n");
+	     goto fatal_error;
 								    
         OrbisUserServiceInitializeParams params;
 	memset(&params, 0, sizeof(params));
@@ -159,18 +173,18 @@ now we can finally run our daemon as follows
 	}
 
 	LncAppParam param;
-	param.size = sizeof(LncAppParam);
+	param.sz = sizeof(LncAppParam);
 	param.user_id = userIdList.userId[0];
-	param.app_attr = 0;
-	param.enable_crash_report = 0;
+	param.app_opt = 0;
+	param.crash_report = 0;
 	param.check_flag = 0;
 
 	klog("sceLncUtilInitialize %x\n", sceLncUtilInitialize());
 
-       uint64_t l2 = sceLncUtilLaunchApp("LMSS00001", 0, &param);
+        Klog("App Launch res: %x\n", sceLncUtilLaunchApp("LMSS00001", 0, &param));
 ```
 
-and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT
+and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT.
 
 ```
 
@@ -201,7 +215,7 @@ sceNetListen(): 0x00000000
 Waiting for incoming connections...
 ```
 
-(Also works for Launching Game see the trailer for more info)
+(Also works for Launching Games see the trailer for more info)
 
 
 
