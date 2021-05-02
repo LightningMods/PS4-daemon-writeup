@@ -61,11 +61,11 @@ An example of what ShellUI does in case anyone wants to hook it in mono via LNC 
 
 LncUtil.LaunchAppParam launchAppParam = default(LncUtil.LaunchAppParam);
 
-                    byte[] array = new byte[3];
-                    array[0] = 45;
-                    array[1] = 105;
-                    byte[] array2 = array;
-                    LncUtil.LaunchApp("NPXS21018", array2, array2.Length, ref launchAppParam);
+byte[] array = new byte[3];
+array[0] = 45;
+array[1] = 105;
+byte[] array2 = array;
+LncUtil.LaunchApp("NPXS21018", array2, array2.Length, ref launchAppParam);
 ```
 
 just like sceSystemServiceLaunchApp these seem to have the same protos in the `libSceSystemService` module
