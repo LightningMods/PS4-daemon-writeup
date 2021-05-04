@@ -76,7 +76,7 @@ just like sceSystemServiceLaunchApp these seem to have the same protos in the `l
 ```
 int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
 int (*sceLncUtilStartLaunchAppByTitleId)(const char* titleId, const char* argv[], LncAppParam* param);
-int (*sceLncUtilStartLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
+int (*sceLncUtilLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
 ```
 
 `sceSystemServiceLaunchApp` calls `sceLncUtilStartLaunchApp` which then calls the IPC iirc
