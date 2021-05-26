@@ -44,13 +44,25 @@ first things first finding the structs which it seems to use
 after looking in shellui i found them!
 
 ```
+
+enum Flag
+{
+    Flag_None = 0,
+    SkipLaunchCheck = 1,
+    SkipResumeCheck = 1,
+    SkipSystemUpdateCheck = 2,
+    RebootPatchInstall = 4,
+    VRMode = 8,
+    NonVRMode = 16
+};
+
 typedef struct _LncAppParam
 {
 	u32 sz;
 	u32 user_id;
 	u32 app_opt;
 	u64 crash_report;
-	u64 check_flag;
+	Flag check_flag;
 }
 LncAppParam;
 ```
@@ -190,7 +202,7 @@ But at the time I didn't make the stubs yet so I did it manually.
 	param.user_id = userIdList.userId[0];
 	param.app_opt = 0;
 	param.crash_report = 0;
-	param.check_flag = 0;
+	param.check_flag = 0; //Flag_None
 
 	klog("sceLncUtilInitialize %x\n", sceLncUtilInitialize());
 
