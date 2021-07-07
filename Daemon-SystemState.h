@@ -1,4 +1,4 @@
-  public enum SystemState
+        enum SystemState
         {
             INVALID = 0,
             INITIALIZING = 10,
@@ -8,7 +8,8 @@
             MAIN_ON_STANDBY = 500,
             WORKING = 1000
         };
-        public enum TriggerCode
+
+        enum TriggerCode
         {
             INVALID = 0,
             MISC = 1,
@@ -28,7 +29,7 @@
 ///////////////////// USEFUL //////////////////
 
 int sceSystemStateMgrGetCurrentState(void);
-int sceSystemStateMgrWakeUp(TriggerCode code);
+int sceSystemStateMgrWakeUp(enum TriggerCode code);
 int sceSystemStateMgrEnterStandby(int a1);
 bool sceSystemStateMgrIsStandbyModeEnabled(void);
 int sceSystemStateMgrGetTriggerCode(void);
