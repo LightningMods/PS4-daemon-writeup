@@ -1,7 +1,7 @@
 #pragma once
 
 
-#define SCE_LNC_ERROR_APP_NOT_FOUND 0x80940031 // Usually happens if you to launch an app not in app.db
+#define SCE_LNC_ERROR_APP_NOT_FOUND 0x80940031 // Usually happens if you try to launch an app not in app.db
 #define SCE_LNC_UTIL_ERROR_ALREADY_INITIALIZED 0x80940018
 #define SCE_LNC_UTIL_ERROR_ALREADY_RUNNING 0x8094000c
 #define SCE_LNC_UTIL_ERROR_ALREADY_RUNNING_KILL_NEEDED 0x80940010
