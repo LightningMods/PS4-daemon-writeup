@@ -166,13 +166,7 @@ Since all LNC Error begin with 0x8094XXXX just a simple math problem
 
 bool IS_ERROR(uint32_t a1)
 {
-    uint32_t res;
-
-    res = (unsigned int)(a1 - 0x10000000);
-    if (res > 0x70000000)
-        return true;
-
-    return false;
+   return a1 & 0x80000000;
 }
 ```
 
