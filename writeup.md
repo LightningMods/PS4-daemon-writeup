@@ -88,7 +88,8 @@ just like sceSystemServiceLaunchApp these seem to have the same protos in the `l
 ```
 int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
 int (*sceLncUtilStartLaunchAppByTitleId)(const char* titleId, const char* argv[], LncAppParam* param);
-int (*sceLncUtilLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
+//returns the Systems runetime app id 
+u32 (*sceLncUtilLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
 ```
 
 `sceSystemServiceLaunchApp` calls `sceLncUtilStartLaunchApp` which then calls the IPC iirc
@@ -206,7 +207,10 @@ But at the time I didn't make the stubs yet so I did it manually.
 
 	klog("sceLncUtilInitialize %x\n", sceLncUtilInitialize());
 
-        Klog("App Launch res: %x\n", sceLncUtilLaunchApp("LMSS00001", 0, &param));
+        u32 appid = sceLncUtilLaunchApp("LMSS00001", 0, &param)
+        //Error handling
+        if (!sys_res & 0x6) // app_ids start with 0x6XXXXXXX
+        
 ```
 
 and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT.
