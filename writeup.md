@@ -209,7 +209,7 @@ But at the time I didn't make the stubs yet so I did it manually.
 
         u32 appid = sceLncUtilLaunchApp("LMSS00001", 0, &param)
         //Error handling
-        if (!sys_res & 0x6) // app_ids start with 0x6XXXXXXX
+        if (!appid & 0x6) // app_ids start with 0x6XXXXXXX
         
 ```
 
