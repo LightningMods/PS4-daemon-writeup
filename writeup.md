@@ -161,8 +161,24 @@ now we can finally run our daemon as follows
 Note: you can use LncUtil stubs instead with your SDK of choice to link these funcs
 But at the time I didn't make the stubs yet so I did it manually.
 
+Since all LNC Error begin with 0x8094XXXX just a simple math problem
+```
+
+bool IS_ERROR(uint32_t a1)
+{
+    uint32_t res;
+
+    res = (unsigned int)(a1 - 0x10000000);
+    if (res > 0x70000000)
+        return true;
+
+    return false;
+}
+```
+
 
 ```
+
      sys_dynlib_load_prx("/system/common/lib/libSceSystemService.sprx", &libcmi);
 
     int serres = sys_dynlib_dlsym(libcmi, "sceSystemServiceLaunchApp", &sceSystemServiceLaunchApp_pointer);
@@ -207,9 +223,9 @@ But at the time I didn't make the stubs yet so I did it manually.
 
 	klog("sceLncUtilInitialize %x\n", sceLncUtilInitialize());
 
-        u32 appid = sceLncUtilLaunchApp("LMSS00001", 0, &param)
+        u32 res = sceLncUtilLaunchApp("LMSS00001", 0, &param)
         //Error handling
-        if (!appid & 0x6) // app_ids start with 0x6XXXXXXX
+        if (IS_ERROR(res)) // app_ids start with 0x6XXXXXXX
         
 ```
 
