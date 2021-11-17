@@ -90,6 +90,10 @@ int (*sceSystemServiceLaunchApp)(const char* titleId, const char* argv[], LncApp
 int (*sceLncUtilStartLaunchAppByTitleId)(const char* titleId, const char* argv[], LncAppParam* param);
 //returns the Systems runetime app id 
 u32 (*sceLncUtilLaunchApp)(const char* titleId, const char* argv[], LncAppParam* param);
+int(*sceSystemServiceRegisterDaemon)(void); // returns 0 for success
+int(*sceLncUtilRegisterDaemon)(void);
+int(*sceLncUtilUnregisterDaemon)(void);
+
 ```
 
 `sceSystemServiceLaunchApp` calls `sceLncUtilStartLaunchApp` which then calls the IPC iirc
@@ -222,6 +226,15 @@ bool IS_ERROR(uint32_t a1)
         if (IS_ERROR(res)) // app_ids start with 0x6XXXXXXX
         
 ```
+since a daemon is a System proc. it has special needs
+
+- It needs to be linked with libkernel_sys
+- You need manually load all system modules (i.e UserService, SystemService, SceNet etc etc) 
+using the `sceSysmoduleLoadModuleInternal` API `(Usage sceSysmoduleLoadModuleInternal(LIB_NUMBER))`
+replace LIB_NUMBER with the real number from here [!Psdevwiki Internal Libs](https://www.psdevwiki.com/ps4/Libraries#Internal_sysmodule_libraries)
+- **Optional** SystemState functions [!SystemState](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/Daemon-SystemState.h)
+- **Optional** Register the Daemon with the PS4 by calling `sceSystemServiceRegisterDaemon(void)`
+- **Optional** Unregister the Daemon with the PS4 by calling `sceLncUtilUnregisterDaemon(void)`
 
 and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT.
 
@@ -254,7 +267,7 @@ sceNetListen(): 0x00000000
 Waiting for incoming connections...
 ```
 
-(Also works for Launching Games see the trailer for more info)
+(Also works for Launching Games)
 
 
 
