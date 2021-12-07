@@ -235,6 +235,8 @@ replace LIB_NUMBER with the real number from here [!Psdevwiki Internal Libs](htt
 - **Optional** SystemState functions [!SystemState](https://github.com/LightningMods/PS4-daemon-writeup/blob/main/Daemon-SystemState.h)
 - **Optional** Register the Daemon with the PS4 by calling `sceSystemServiceRegisterDaemon(void)`
 - **Optional** Unregister the Daemon with the PS4 by calling `sceLncUtilUnregisterDaemon(void)`
+- **Optional** for Daemons to read or use the Controller you MUST add this after initiating 
+The scePad library (`scePadInit()`) `scePadSetProcessPrivilege(1)` this sets Pad Proc Perms
 
 and after all our work Success! iv successfully launched my own daemon, mine took awhile to make as i have a RPC Server thats does ALOT.
 
