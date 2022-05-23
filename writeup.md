@@ -268,7 +268,49 @@ sceNetBind(): 0x00000000
 sceNetListen(): 0x00000000
 Waiting for incoming connections...
 ```
+## 2nd way to launch a daemon wtihout writing to /system
 
+You can also launch a daemon using `sceSystemServiceAddLocalProcess`
+
+```
+sceSystemServiceAddLocalProcess(int AppId, const char* DAEMON_EBOOT, int param_size, const char* args[]);
+```
+
+Using the following method
+
+```
+const char* args[] = {
+   "--CUSTOM_ARGS",
+   NULL,
+};
+
+//Your Apps AppId HERE
+int appID = sceSystemServiceGetAppIdOfMiniApp();
+
+//DAEMON EBOOT Path
+char* path = "/data/eboot.bin";
+
+//returns appId on successful launch (> 0)
+sceSystemServiceAddLocalProcess(appID, path, 0, &args);
+```
+
+after you see it works, only downside is if that AppId/App you gave it ever dies or crashes so will your daemon unlike the other way
+
+```
+[SceShellCore] FMEM  17.1/2591.5 ITEM00001 ItemzCore.self
+[SceShellCore] FMEM   4.0/  31.1 ITEM00001 eboot.bin
+```
+
+Additonally you can kill Daemons using many functions, heres one
+
+```
+int sceSystemServiceKillApp(int appid, int how_to_kill, int kill_reason, bool core_dump );
+
+ if ((appid & ~0xFFFFFF) == 0x60000000)
+    return sceSystemServiceKillApp(appid, -1, 0, 0);
+
+```
+ 
 (Also works for Launching Games)
 
 
